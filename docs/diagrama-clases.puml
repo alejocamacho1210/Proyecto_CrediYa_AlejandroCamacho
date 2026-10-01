@@ -1,0 +1,160 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+
+package model {
+  abstract class Entidad {
+    -id : int
+    +getId() : int
+    +setId(id : int)
+  }
+  abstract class Persona {
+    -nombre : String
+    -documento : String
+    -correo : String
+    +getTipo() : String
+  }
+  class Empleado {
+    -rol : String
+    -salario : BigDecimal
+  }
+  class Cliente {
+    -telefono : String
+  }
+  class Prestamo {
+    -clienteId : int
+    -empleadoId : int
+    -monto : BigDecimal
+    -interes : BigDecimal
+    -cuotas : int
+    -fechaInicio : LocalDate
+    -estado : EstadoPrestamo
+    +getMontoTotal() : BigDecimal
+    +getValorCuota() : BigDecimal
+    +getTotalPagado() : BigDecimal
+    +getSaldoPendiente() : BigDecimal
+    +isVencido(hoy : LocalDate) : boolean
+    +isEnMora(hoy : LocalDate) : boolean
+  }
+  class Pago {
+    -prestamoId : int
+    -fecha : LocalDate
+    -monto : BigDecimal
+  }
+  enum EstadoPrestamo {
+    PENDIENTE
+    PAGADO
+  }
+}
+
+package repository {
+  interface "Repositorio<T>" as Repositorio {
+    +guardar(entidad : T) : T
+    +actualizar(entidad : T)
+    +buscarPorId(id : int) : Optional<T>
+    +listar() : List<T>
+  }
+  abstract class "RepositorioArchivo<T>" as RepositorioArchivo {
+    #serializar(entidad : T) : String
+    #deserializar(campos : String[]) : T
+    +reemplazarTodo(entidades : List<T>)
+  }
+  abstract class "RepositorioMySQL<T>" as RepositorioMySQL {
+    #sqlInsertar() : String
+    #sqlActualizar() : String
+    #mapear(rs : ResultSet) : T
+  }
+  class "RepositorioCompuesto<T>" as RepositorioCompuesto {
+    +sincronizar()
+  }
+  class EmpleadoRepositorioArchivo
+  class ClienteRepositorioArchivo
+  class PrestamoRepositorioArchivo
+  class PagoRepositorioArchivo
+  class EmpleadoRepositorioMySQL
+  class ClienteRepositorioMySQL
+  class PrestamoRepositorioMySQL
+  class PagoRepositorioMySQL
+}
+
+package config {
+  class ConexionBD <<singleton>> {
+    +getInstancia() : ConexionBD
+    +obtener() : Connection
+    +estaDisponible() : boolean
+  }
+}
+
+package service {
+  class EmpleadoService
+  class ClienteService
+  class PrestamoService
+  class PagoService
+  class ReporteService
+}
+
+package ui {
+  abstract class Menu {
+    +ejecutar()
+    #procesar(opcion : int)
+  }
+  class MenuPrincipal
+  class MenuEmpleados
+  class MenuClientes
+  class MenuPrestamos
+  class MenuPagos
+  class MenuReportes
+}
+
+Entidad <|-- Persona
+Persona <|-- Empleado
+Persona <|-- Cliente
+Entidad <|-- Prestamo
+Entidad <|-- Pago
+Prestamo --> EstadoPrestamo
+Prestamo "1" o-- "*" Pago
+Cliente "1" <-- "*" Prestamo
+Empleado "1" <-- "*" Prestamo
+
+Repositorio <|.. RepositorioArchivo
+Repositorio <|.. RepositorioMySQL
+Repositorio <|.. RepositorioCompuesto
+RepositorioCompuesto o-- Repositorio : principal
+RepositorioCompuesto o-- RepositorioArchivo : espejo
+RepositorioArchivo <|-- EmpleadoRepositorioArchivo
+RepositorioArchivo <|-- ClienteRepositorioArchivo
+RepositorioArchivo <|-- PrestamoRepositorioArchivo
+RepositorioArchivo <|-- PagoRepositorioArchivo
+RepositorioMySQL <|-- EmpleadoRepositorioMySQL
+RepositorioMySQL <|-- ClienteRepositorioMySQL
+RepositorioMySQL <|-- PrestamoRepositorioMySQL
+RepositorioMySQL <|-- PagoRepositorioMySQL
+RepositorioMySQL --> ConexionBD
+
+EmpleadoService --> Repositorio
+ClienteService --> Repositorio
+PrestamoService --> Repositorio
+PrestamoService --> ClienteService
+PrestamoService --> EmpleadoService
+PagoService --> PrestamoService
+ReporteService --> PrestamoService
+ReporteService --> PagoService
+
+Menu <|-- MenuPrincipal
+Menu <|-- MenuEmpleados
+Menu <|-- MenuClientes
+Menu <|-- MenuPrestamos
+Menu <|-- MenuPagos
+Menu <|-- MenuReportes
+MenuPrincipal o-- MenuEmpleados
+MenuPrincipal o-- MenuClientes
+MenuPrincipal o-- MenuPrestamos
+MenuPrincipal o-- MenuPagos
+MenuPrincipal o-- MenuReportes
+MenuEmpleados --> EmpleadoService
+MenuClientes --> ClienteService
+MenuPrestamos --> PrestamoService
+MenuPagos --> PagoService
+MenuReportes --> ReporteService
+@enduml
