@@ -2,7 +2,7 @@
 
 Aplicación de consola en **Java 17** para que **CrediYa S.A.S.** gestione empleados, clientes, préstamos, pagos y reportes de cartera, con persistencia simultánea en **archivos de texto** y **MySQL (JDBC)**.
 
-## Características
+## Características 
 
 - **Empleados**: registrar, listar, consultar por ID y buscar por nombre (`id, nombre, documento, rol, correo, salario`).
 - **Clientes**: registrar, listar, consultar, buscar y ver los préstamos asociados (`id, nombre, documento, correo, telefono`).
@@ -193,13 +193,3 @@ ID   CLIENTE                        MONTO INT/MES CUOTAS           TOTAL        
 | ISP | Interfaz `Repositorio<T>` mínima |
 | DIP | Los servicios dependen de `Repositorio<T>`, no de implementaciones |
 
-## Publicar en GitHub
-
-```bash
-git init
-git add .
-git commit -m "CrediYa: sistema de cobros de cartera"
-git branch -M main
-git remote add origin https://github.com/<usuario>/crediya.git
-git push -u origin main
-```
